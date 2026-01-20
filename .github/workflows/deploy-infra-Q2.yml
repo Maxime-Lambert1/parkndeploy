@@ -5,7 +5,7 @@ permissions:
   # It will be automatically used on actions / cli that needs it
   id-token: write
 
-  #### zivqiubquovbqdufbv TEST
+  #### zivqiubquovbqdufbv TEST  
 
 jobs:
   deploy_backend:
@@ -38,5 +38,5 @@ jobs:
       working-directory: ./frontend    
 
     - name: Build the lint
-      run: run lint
+      run: npm run lint
       working-directory: ./frontend  
