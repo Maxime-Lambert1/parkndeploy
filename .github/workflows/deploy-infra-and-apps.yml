@@ -175,7 +175,7 @@ jobs :
           name: artifact_front
           path: ./artifacts_frontend
 
-  deploy_infra:
+  deploy_infrastructure:
     runs-on: ubuntu-latest
     environment: production # bind the job to the production environment
     needs: [build_backend, build_frontend]
@@ -213,7 +213,7 @@ jobs :
 
   deploy_backend :
     runs-on: ubuntu-latest
-    needs: deploy_infra
+    needs: deploy_infrastructure
     environment: production
 
     steps:
@@ -233,12 +233,12 @@ jobs :
     - name: Deploy backend to App Service
       uses: azure/webapps-deploy@v2
       with: 
-        app-name: ${{ needs.deploy_infra.outputs.appServiceName }} # Access to the previous job output to get the appServiceName deployed with bicep
+        app-name: ${{ needs.deploy_infrastructure.outputs.appServiceName }} # Access to the previous job output to get the appServiceName deployed with bicep
         package: ./artifacts_backend/artifact_back # Path to the previously published app
 
   deploy_frontend:
     runs-on: ubuntu-latest
-    needs: deploy_infra
+    needs: deploy_infrastructure
     environment: production
 
     steps:
@@ -257,7 +257,7 @@ jobs :
 
     - name: Get Static Web App deployment token
       run: |      
-        SWA_DEPLOYMENT_TOKEN=$(az staticwebapp secrets list -n ${{ needs.deploy_infra.outputs.staticWebAppName }} -o tsv --query properties.apiKey)
+        SWA_DEPLOYMENT_TOKEN=$(az staticwebapp secrets list -n ${{ needs.deploy_infrastructure.outputs.staticWebAppName }} -o tsv --query properties.apiKey)
         echo SWA_DEPLOYMENT_TOKEN=$SWA_DEPLOYMENT_TOKEN >> $GITHUB_ENV
   
     - name: Deploy frontend to Static Web App
