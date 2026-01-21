@@ -148,7 +148,7 @@ jobs :
         
     - name: Publish the app
       run: dotnet publish -c Release --property:PublishDir=publish # Publish the app to the API project publish folder
-      working-directory: ./backend
+      working-directory: ./backend # Specify where to find the solution file in repository
 
 
     - name: Upload Artifact
@@ -221,7 +221,7 @@ jobs :
       uses: actions/download-artifact@v4
       with:
           name: artifact_back
-          path: ./backend/publish
+          path: ./backend_artifact
     
     - name: Login to Azure 
       uses: azure/login@v2
@@ -234,7 +234,7 @@ jobs :
       uses: azure/webapps-deploy@v2
       with: 
         app-name: ${{ needs.deploy_infrastructure.outputs.appServiceName }} # Access to the previous job output to get the appServiceName deployed with bicep
-        package: ./backend/publish # Path to the previously published app
+        package: ./backend_artifact # Path to the previously published app
 
   deploy_frontend:
     runs-on: ubuntu-latest
