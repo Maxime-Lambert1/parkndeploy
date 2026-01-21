@@ -153,8 +153,8 @@ jobs :
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-          name: artifact_backend
-          path: /artifacts
+          name: artifact_back
+          path: ./artifacts_backend
 
   build_frontend:
     runs-on: ubuntu-latest
@@ -171,8 +171,8 @@ jobs :
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-          name: artifact_frontend
-          path: ./artifacts
+          name: artifact_front
+          path: ./artifacts_frontend
 
   deploy_infra:
     runs-on: ubuntu-latest
@@ -219,8 +219,8 @@ jobs :
     - name: Download a single artifact backend
       uses: actions/download-artifact@v4
       with:
-          name: artifact_backend
-          path: ./artifacts
+          name: artifact_back
+          path: ./artifacts_backend
     
     - name: Login to Azure 
       uses: azure/login@v2
@@ -233,7 +233,7 @@ jobs :
       uses: azure/webapps-deploy@v2
       with: 
         app-name: ${{ needs.deploy_infrastructure.outputs.appServiceName }} # Access to the previous job output to get the appServiceName deployed with bicep
-        package: ./backend/ParkNDeploy.Api/publish # Path to the previously published app
+        package: ./artifacts_backend/artifact_back # Path to the previously published app
 
   deploy_frontend:
     runs-on: ubuntu-latest
@@ -244,8 +244,8 @@ jobs :
     - name: Download a single artifact frontend
       uses: actions/download-artifact@v4
       with:
-          name: artifact_frontend
-          path: ./artifacts
+          name: artifact_front
+          path: ./artifacts_frontend
 
     - name: Login to Azure 
       uses: azure/login@v2
@@ -263,7 +263,7 @@ jobs :
       uses: azure/static-web-apps-deploy@v1
       with:
         azure_static_web_apps_api_token: ${{ env.SWA_DEPLOYMENT_TOKEN }}
-        app_location: frontend/dist
+        app_location: ./artifacts_frontend/artifact_front
         action: upload
         skip_app_build: true
 
