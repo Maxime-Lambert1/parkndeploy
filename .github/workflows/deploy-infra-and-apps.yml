@@ -264,7 +264,7 @@ jobs :
       uses: azure/static-web-apps-deploy@v1
       with:
         azure_static_web_apps_api_token: ${{ env.SWA_DEPLOYMENT_TOKEN }}
-        app_location: ./artifacts_frontend/artifact_front
+        app_location: ./frontend/dist
         action: upload
         skip_app_build: true
 
