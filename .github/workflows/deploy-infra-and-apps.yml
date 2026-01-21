@@ -147,8 +147,9 @@ jobs :
         dotnet-version: '9.0.x'
         
     - name: Publish the app
-      run: dotnet publish -c Release -o publish # Publish the app to the API project publish folder
-      working-directory: ./backend # Specify where to find the solution file in repository
+      run: dotnet publish -c Release -o ../artifacts_backend
+      working-directory: ./backend
+
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -256,7 +257,7 @@ jobs :
 
     - name: Get Static Web App deployment token
       run: |      
-        SWA_DEPLOYMENT_TOKEN=$(az staticwebapp secrets list -n ${{ needs.deploy_infrastructure.outputs.staticWebAppName }} -o tsv --query properties.apiKey)
+        SWA_DEPLOYMENT_TOKEN=$(az staticwebapp secrets list -n ${{ needs.deploy_infra.outputs.staticWebAppName }} -o tsv --query properties.apiKey)
         echo SWA_DEPLOYMENT_TOKEN=$SWA_DEPLOYMENT_TOKEN >> $GITHUB_ENV
   
     - name: Deploy frontend to Static Web App
