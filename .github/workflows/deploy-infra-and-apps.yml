@@ -147,7 +147,7 @@ jobs :
         dotnet-version: '9.0.x'
         
     - name: Publish the app
-      run: dotnet publish -c Release --property:PublishDir=publish # Publish the app to the API project publish folder
+      run: dotnet publish -c Release -o publish # Publish the app to the API project publish folder
       working-directory: ./backend # Specify where to find the solution file in repository
 
     - name: Upload Artifact
@@ -187,18 +187,6 @@ jobs :
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Download a single artifact frontend
-      uses: actions/download-artifact@v5
-      with:
-          name: artifact_frontend
-          path: ./artifacts
-
-    - name: Download a single artifact backend
-      uses: actions/download-artifact@v5
-      with:
-          name: artifact_backend
-          path: ./artifacts
-
     - name: Login to Azure 
       uses: azure/login@v2
       with:
@@ -221,3 +209,61 @@ jobs :
         template: ./infrastructure/main.bicep
         parameters: project=${{ vars.PROJECT_NAME }} location=${{ secrets.AZURE_REGION }} swaLocation=${{ secrets.AZURE_SWA_REGION }} identifier=${{ vars.AZURE_RESOURCE_IDENTIFIER }}
         resourceGroupName: ${{ env.AZURE_RG_NAME }}
+
+  deploy_backend :
+    runs-on: ubuntu-latest
+    needs: deploy_infra
+    environment: production
+
+    steps:
+    - name: Download a single artifact backend
+      uses: actions/download-artifact@v5
+      with:
+          name: artifact_backend
+          path: ./artifacts
+    
+    - name: Login to Azure 
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
+    - name: Deploy backend to App Service
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ needs.deploy_infrastructure.outputs.appServiceName }} # Access to the previous job output to get the appServiceName deployed with bicep
+        package: ./backend/ParkNDeploy.Api/publish # Path to the previously published app
+
+  deploy_frontend:
+    runs-on: ubuntu-latest
+    needs: deploy_infra
+    environment: production
+
+    steps:
+    - name: Download a single artifact frontend
+      uses: actions/download-artifact@v5
+      with:
+          name: artifact_frontend
+          path: ./artifacts
+
+    - name: Login to Azure 
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }} 
+
+    - name: Get Static Web App deployment token
+      run: |      
+        SWA_DEPLOYMENT_TOKEN=$(az staticwebapp secrets list -n ${{ needs.deploy_infrastructure.outputs.staticWebAppName }} -o tsv --query properties.apiKey)
+        echo SWA_DEPLOYMENT_TOKEN=$SWA_DEPLOYMENT_TOKEN >> $GITHUB_ENV
+  
+    - name: Deploy frontend to Static Web App
+      uses: azure/static-web-apps-deploy@v1
+      with:
+        azure_static_web_apps_api_token: ${{ env.SWA_DEPLOYMENT_TOKEN }}
+        app_location: frontend/dist
+        action: upload
+        skip_app_build: true
+
