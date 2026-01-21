@@ -233,7 +233,7 @@ jobs :
     - name: Deploy backend to App Service
       uses: azure/webapps-deploy@v2
       with: 
-        app-name: ${{ needs.deploy_infrastructure.outputs.appServiceName }} # Access to the previous job output to get the appServiceName deployed with bicep
+        app-name: ${{ needs.deploy_infra.outputs.appServiceName }} # Access to the previous job output to get the appServiceName deployed with bicep
         package: ./artifacts_backend/artifact_back # Path to the previously published app
 
   deploy_frontend:
