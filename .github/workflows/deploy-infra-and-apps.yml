@@ -177,8 +177,7 @@ jobs :
   deploy_infra:
     runs-on: ubuntu-latest
     environment: production # bind the job to the production environment
-    needs: build_backend
-    needs: build_frontend
+    needs: [build_backend, build_frontend]
 
     outputs: 
       appServiceName: ${{ steps.bicep_deploy.outputs.appServiceName }}
